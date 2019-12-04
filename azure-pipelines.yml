@@ -6,8 +6,18 @@
 trigger:
 - master
 
+strategy:
+  matrix:
+    linux:
+      imageName: "ubuntu-16.04"
+    mac:
+      imageName: "macos-10.13"
+    windows:
+      imageName: "vs2017-win2016"
+  maxParallel: 3
+
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: $(imageName)
 
 steps:
 - task: Maven@3
@@ -20,16 +30,9 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
-- task: Maven@3
+- task: PublishCodeCoverageResults@1
   inputs:
-    mavenPomFile: 'pom.xml'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    codeCoverageToolOption: 'Cobertura'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    mavenVersionOption: 'Default'
-    mavenOptions: '-Xmx3072m'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false
+    codeCoverageTool: "JaCoCo"
+    summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/site/jacoco/jacoco.xml"
+    reportDirectory: "$(System.DefaultWorkingDirectory)/**/site/jacoco"
+    failIfCoverageEmpty: true
